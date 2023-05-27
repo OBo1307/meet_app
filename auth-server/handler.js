@@ -2,16 +2,8 @@ const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
 const calendar = google.calendar('v3');
 
-/**
- * SCOPES allows you to set access levels, this is set to read only for now because you don't have acces rights to update the calendar yourself.
- * For more info,check out the SCOPES documentation at this link: https://developers.google.com/identity/protocols/oauth2/scopes
- */
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 
-/**
- * Credentials are values required to get access to your calendar. If you see “process.env” this means the value is in the “config.json” file.
- * This is a best practice as it keeps your API secrets hidden. Please remember to add “config.json” to your “.gitignore” file.
- */
 const credentials = {
 	client_id: process.env.CLIENT_ID,
 	project_id: process.env.PROJECT_ID,
@@ -21,7 +13,7 @@ const credentials = {
 	token_uri: 'https://oauth2.googleapis.com/token',
 	auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
 	redirect_uris: ['https://obo1307.github.io/meet_app/'],
-	javascript_origins: ['https://obo1307.github.io', 'https://localhost:3000'],
+	javascript_origins: ['https://obo1307.github.io', 'http://localhost:3000'],
 };
 
 const { client_secret, client_id, redirect_uris, calendar_id } = credentials;
@@ -31,19 +23,7 @@ const oAuth2Client = new google.auth.OAuth2(
 	redirect_uris[0]
 );
 
-/**
- *
- * The first step in the OAuth process is to generate a URL so users can log in with Google and be authorized to see the calendar events data.
- * After logging in, they'll receive a code as a URL parameter.
- *
- */
 module.exports.getAuthURL = async () => {
-	/**
-	 *
-	 * Scopes array passed to the `scope` option. Any scopes passed must be enabled in the "OAuth consent screen" settings in the project on Google Console.
-	 * Also, any passed scopes are the ones users will see when the consent screen is displayed to them.
-	 *
-	 */
 	const authUrl = oAuth2Client.generateAuthUrl({
 		access_type: 'offline',
 		scope: SCOPES,
@@ -62,25 +42,23 @@ module.exports.getAuthURL = async () => {
 };
 
 module.exports.getAccessToken = async (event) => {
-	// The values used to instantiate the OAuthClient are at the top of the file
 	const oAuth2Client = new google.auth.OAuth2(
 		client_id,
 		client_secret,
 		redirect_uris[0]
 	);
-	// Decode authorization code extracted from the URL query
+
 	const code = decodeURIComponent(`${event.pathParameters.code}`);
 
 	return new Promise((resolve, reject) => {
-		oAuth2Client.getToken(code, (err, token) => {
-			if (err) {
-				return reject(err);
+		oAuth2Client.getToken(code, (error, token) => {
+			if (error) {
+				return reject(error);
 			}
 			return resolve(token);
 		});
 	})
 		.then((token) => {
-			// Respond with OAuth token
 			return {
 				statusCode: 200,
 				headers: {
@@ -90,28 +68,21 @@ module.exports.getAccessToken = async (event) => {
 				body: JSON.stringify(token),
 			};
 		})
-		.catch((err) => {
-			// Handle error
-			console.error(err);
+		.catch((error) => {
+			console.error(error);
 			return {
 				statusCode: 500,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(err),
+				body: JSON.stringify(error),
 			};
 		});
 };
 
 module.exports.getCalendarEvents = async (event) => {
-	// The values used to instantiate the OAuthClient are at the top of the file
 	const oAuth2Client = new google.auth.OAuth2(
 		client_id,
 		client_secret,
 		redirect_uris[0]
 	);
-	// Decode access token extracted from the URL query
 	const access_token = decodeURIComponent(
 		`${event.pathParameters.access_token}`
 	);
@@ -146,16 +117,11 @@ module.exports.getCalendarEvents = async (event) => {
 				body: JSON.stringify({ events: results.data.items }),
 			};
 		})
-		.catch((err) => {
-			// Handle error
-			console.error(err);
+		.catch((error) => {
+			console.error(error);
 			return {
 				statusCode: 500,
-				headers: {
-					'Access-Control-Allow-Origin': '*',
-					'Access-Control-Allow-Credentials': true,
-				},
-				body: JSON.stringify(err),
+				body: JSON.stringify(error),
 			};
 		});
 };
