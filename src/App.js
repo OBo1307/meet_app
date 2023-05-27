@@ -5,12 +5,14 @@ import EventList from './EventList';
 import CitySearch from './CitySearch';
 import NumberOfEvents from './NumberOfEvents';
 import { getEvents, extractLocations } from './api';
+import { WarningAlert } from './Alert';
 
 class App extends Component {
 	state = {
 		events: [],
 		locations: [],
 		numEvents: 32,
+		warningText: '',
 	};
 
 	updateNumEvents = (value) => {
@@ -33,6 +35,7 @@ class App extends Component {
 
 	componentDidMount() {
 		this.mounted = true;
+		this.promptOfflineWarning();
 		getEvents().then((events) => {
 			if (this.mounted) {
 				this.setState({
@@ -43,6 +46,19 @@ class App extends Component {
 		});
 	}
 
+	promptOfflineWarning = () => {
+		if (!navigator.onLine) {
+			this.setState({
+				warningText:
+					'You are currently offline. Events displayed may not be up-to-date.',
+			});
+		} else {
+			this.setState({
+				warningText: '',
+			});
+		}
+	};
+
 	componentWillUnmount() {
 		this.mounted = false;
 	}
@@ -50,6 +66,7 @@ class App extends Component {
 	render() {
 		return (
 			<div className='App'>
+				<WarningAlert text={this.state.warningText} />
 				<CitySearch
 					locations={this.state.locations}
 					updateEvents={this.updateEvents}
