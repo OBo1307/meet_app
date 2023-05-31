@@ -17,7 +17,8 @@ The main goal of this project is to develop a PWA that combines the benefits of 
 -	Serverless: No backend maintenance, easy to scale, always available, no cost for idle time.
 -	PWAs: Instant loading, offline support, push notifications, "add to home screen" prompt, responsive design, and cross-platform compatibility.
 
-#Key Features:
+## Key Features:
+
 1.Feature: 
 Filter events by city.
 User Story: 
