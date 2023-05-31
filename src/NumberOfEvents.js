@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { ErrorAlert } from './Alert';
+import './App.css';
 
 class NumberOfEvents extends Component {
 	state = {
@@ -29,9 +30,6 @@ class NumberOfEvents extends Component {
 		return (
 			<div className='NumberOfEvents'>
 				<ErrorAlert text={this.state.errorText} />
-				<label htmlFor='num-events' className='number-label'>
-					Number of Events:
-				</label>
 				<input
 					type='number'
 					id='num-events'
